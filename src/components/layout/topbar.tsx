@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Menu01Icon, Search01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
+import { Menu01Icon, Notification03Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sheet,
@@ -45,18 +44,7 @@ export function Topbar() {
         </SheetContent>
       </Sheet>
 
-      <div className="relative flex-1 max-w-sm">
-        <HugeiconsIcon
-          icon={Search01Icon}
-          className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          type="search"
-          placeholder="Search customers, deals, tasks..."
-          aria-label="Global search"
-          className="pl-8"
-        />
-      </div>
+      
 
       <div className="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="View notifications">
