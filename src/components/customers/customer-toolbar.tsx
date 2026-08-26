@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
@@ -14,6 +15,8 @@ import {
 import type { CustomerFilters } from "@/lib/customer-filters";
 import type { CustomerStatus } from "@/types/customer";
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 interface CustomerToolbarProps {
   filters: CustomerFilters;
   onFiltersChange: (filters: CustomerFilters) => void;
@@ -23,6 +26,16 @@ export function CustomerToolbar({
   filters,
   onFiltersChange,
 }: CustomerToolbarProps) {
+  const searchTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current !== null) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   function updateFilters(changes: Partial<CustomerFilters>) {
     onFiltersChange({
       ...filters,
@@ -30,11 +43,33 @@ export function CustomerToolbar({
     });
   }
 
+  function handleSearchChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const nextSearch = event.target.value;
+
+    if (searchTimeoutRef.current !== null) {
+      window.clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = window.setTimeout(() => {
+      onFiltersChange({
+        ...filters,
+        search: nextSearch,
+      });
+
+      searchTimeoutRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-xs">
-          <label htmlFor="customer-search" className="sr-only">
+          <label
+            htmlFor="customer-search"
+            className="sr-only"
+          >
             Search customers
           </label>
 
@@ -44,21 +79,21 @@ export function CustomerToolbar({
           />
 
           <Input
+            key={filters.search}
             id="customer-search"
             type="search"
             placeholder="Search name, company, email, phone..."
-            value={filters.search}
-            onChange={(event) =>
-              updateFilters({
-                search: event.target.value,
-              })
-            }
+            defaultValue={filters.search}
+            onChange={handleSearchChange}
             className="pl-8"
           />
         </div>
 
         <div className="sm:w-40">
-          <label htmlFor="status-filter" className="sr-only">
+          <label
+            htmlFor="status-filter"
+            className="sr-only"
+          >
             Filter by status
           </label>
 
@@ -85,9 +120,15 @@ export function CustomerToolbar({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">
+                All statuses
+              </SelectItem>
+              <SelectItem value="active">
+                Active
+              </SelectItem>
+              <SelectItem value="inactive">
+                Inactive
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -99,8 +140,6 @@ export function CustomerToolbar({
           Add Customer
         </Link>
       </div>
-
-      
     </div>
   );
 }
