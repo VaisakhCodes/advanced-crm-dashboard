@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { Input } from "@/components/ui/input";
@@ -22,9 +23,7 @@ export function CustomerToolbar({
   filters,
   onFiltersChange,
 }: CustomerToolbarProps) {
-  function updateFilters(
-    changes: Partial<CustomerFilters>
-  ) {
+  function updateFilters(changes: Partial<CustomerFilters>) {
     onFiltersChange({
       ...filters,
       ...changes,
@@ -35,10 +34,7 @@ export function CustomerToolbar({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-xs">
-          <label
-            htmlFor="customer-search"
-            className="sr-only"
-          >
+          <label htmlFor="customer-search" className="sr-only">
             Search customers
           </label>
 
@@ -62,19 +58,20 @@ export function CustomerToolbar({
         </div>
 
         <div className="sm:w-40">
-          <label
-            htmlFor="status-filter"
-            className="sr-only"
-          >
+          <label htmlFor="status-filter" className="sr-only">
             Filter by status
           </label>
 
           <Select
-            value={filters.statuses.length > 0 ? filters.statuses[0] : "all"}
+            value={
+              filters.statuses.length > 0
+                ? filters.statuses[0]
+                : "all"
+            }
             onValueChange={(value) =>
               updateFilters({
                 statuses:
-                  value === null || value === "all"
+                  value === "all"
                     ? []
                     : [value as CustomerStatus],
               })
@@ -94,9 +91,16 @@ export function CustomerToolbar({
             </SelectContent>
           </Select>
         </div>
+
+        <Link
+          href="/customers/new"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          Add Customer
+        </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 sm:max-w-md">
+      <div className="grid gap-3 sm:max-w-md sm:grid-cols-2">
         <div>
           <label
             htmlFor="last-contact-from"
