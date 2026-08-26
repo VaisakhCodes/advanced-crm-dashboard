@@ -70,10 +70,13 @@ export function CustomerToolbar({
           </label>
 
           <Select
-            value={filters.status}
+            value={filters.statuses.length > 0 ? filters.statuses[0] : "all"}
             onValueChange={(value) =>
               updateFilters({
-                status: value as CustomerStatus | "all",
+                statuses:
+                  value === null || value === "all"
+                    ? []
+                    : [value as CustomerStatus],
               })
             }
           >
@@ -85,15 +88,9 @@ export function CustomerToolbar({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="all">
-                All statuses
-              </SelectItem>
-              <SelectItem value="active">
-                Active
-              </SelectItem>
-              <SelectItem value="inactive">
-                Inactive
-              </SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>

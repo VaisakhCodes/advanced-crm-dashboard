@@ -2,14 +2,20 @@ import type { Customer, CustomerStatus } from "@/types/customer";
 
 export type CustomerFilters = {
   search: string;
-  status: CustomerStatus | "all";
+  statuses: CustomerStatus[];
+  companies: string[];
+  email: string;
+  phone: string;
   lastContactFrom: string;
   lastContactTo: string;
 };
 
 export const defaultCustomerFilters: CustomerFilters = {
   search: "",
-  status: "all",
+  statuses: [],
+  companies: [],
+  email: "",
+  phone: "",
   lastContactFrom: "",
   lastContactTo: "",
 };
@@ -19,6 +25,8 @@ export function filterCustomers(
   filters: CustomerFilters
 ): Customer[] {
   const query = filters.search.trim().toLowerCase();
+  const emailQuery = filters.email.trim().toLowerCase();
+  const phoneQuery = filters.phone.trim().toLowerCase();
 
   return customers.filter((customer) => {
     const matchesSearch =
@@ -29,7 +37,20 @@ export function filterCustomers(
       customer.phone.toLowerCase().includes(query);
 
     const matchesStatus =
-      filters.status === "all" || customer.status === filters.status;
+      filters.statuses.length === 0 ||
+      filters.statuses.includes(customer.status);
+
+    const matchesCompany =
+      filters.companies.length === 0 ||
+      filters.companies.includes(customer.company);
+
+    const matchesEmail =
+      !emailQuery ||
+      customer.email.toLowerCase().includes(emailQuery);
+
+    const matchesPhone =
+      !phoneQuery ||
+      customer.phone.toLowerCase().includes(phoneQuery);
 
     const matchesFrom =
       !filters.lastContactFrom ||
@@ -42,6 +63,9 @@ export function filterCustomers(
     return (
       matchesSearch &&
       matchesStatus &&
+      matchesCompany &&
+      matchesEmail &&
+      matchesPhone &&
       matchesFrom &&
       matchesTo
     );
@@ -53,7 +77,10 @@ export function hasActiveCustomerFilters(
 ): boolean {
   return (
     filters.search.trim() !== "" ||
-    filters.status !== "all" ||
+    filters.statuses.length > 0 ||
+    filters.companies.length > 0 ||
+    filters.email.trim() !== "" ||
+    filters.phone.trim() !== "" ||
     filters.lastContactFrom !== "" ||
     filters.lastContactTo !== ""
   );
