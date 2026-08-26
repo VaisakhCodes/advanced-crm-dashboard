@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useCustomers } from "@/hooks/use-customers";
-import {
-  CustomerToolbar,
-} from "@/components/customers/customer-toolbar";
+import { CustomerToolbar } from "@/components/customers/customer-toolbar";
 import { CustomerTable } from "@/components/customers/customer-table";
 import { CustomerPagination } from "@/components/customers/customer-pagination";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,12 @@ import {
 const PAGE_SIZE = 10;
 
 export function CustomerList() {
-  const { data: customers, isLoading, isError, refetch } = useCustomers();
+  const {
+    data: customers,
+    isLoading,
+    isError,
+    refetch,
+  } = useCustomers();
 
   const [filters, setFilters] =
     useState<CustomerFilters>(defaultCustomerFilters);
@@ -37,7 +40,10 @@ export function CustomerList() {
   }
 
   const filtered = useMemo(() => {
-    if (!customers) return [];
+    if (!customers) {
+      return [];
+    }
+
     return filterCustomers(customers, filters);
   }, [customers, filters]);
 
@@ -79,12 +85,14 @@ export function CustomerList() {
       {!isLoading && (
         <p className="text-xs text-muted-foreground">
           {hasFiltersApplied
-            ? `${filtered.length} of ${customers?.length ?? 0} customers`
+            ? `${filtered.length} of ${
+                customers?.length ?? 0
+              } customers`
             : `${customers?.length ?? 0} customers`}
         </p>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <CustomerToolbar
           filters={filters}
           onFiltersChange={handleFiltersChange}
@@ -99,7 +107,9 @@ export function CustomerList() {
         )}
       </div>
 
-      {!isLoading && hasAnyCustomers && filtered.length === 0 ? (
+      {!isLoading &&
+      hasAnyCustomers &&
+      filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-md border border-border py-16 text-center">
           <p className="text-sm text-foreground">
             No customers match your current search or filter.
