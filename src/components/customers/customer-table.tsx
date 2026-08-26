@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -67,9 +68,12 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
               <TableRow key={customer.id}>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium text-foreground">
+                    <Link
+                      href={`/customers/${customer.id}`}
+                      className="font-medium text-foreground hover:underline"
+                    >
                       {customer.name}
-                    </span>
+                    </Link>
                     <span className="text-xs text-muted-foreground">
                       {customer.email}
                     </span>

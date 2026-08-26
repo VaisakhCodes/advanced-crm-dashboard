@@ -26,9 +26,9 @@ export async function getCustomers(): Promise<Customer[]> {
   return delay([...store]);
 }
 
-export async function getCustomerById(id: string): Promise<Customer | undefined> {
+export async function getCustomerById(id: string): Promise<Customer | null> {
   const found = store.find((customer) => customer.id === id);
-  return delay(found ? { ...found } : undefined);
+  return delay(found ? { ...found } : null);
 }
 
 export async function createCustomer(
