@@ -100,47 +100,7 @@ export function CustomerToolbar({
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:max-w-md sm:grid-cols-2">
-        <div>
-          <label
-            htmlFor="last-contact-from"
-            className="mb-1.5 block text-xs text-muted-foreground"
-          >
-            Last contact from
-          </label>
-
-          <Input
-            id="last-contact-from"
-            type="date"
-            value={filters.lastContactFrom}
-            onChange={(event) =>
-              updateFilters({
-                lastContactFrom: event.target.value,
-              })
-            }
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="last-contact-to"
-            className="mb-1.5 block text-xs text-muted-foreground"
-          >
-            Last contact to
-          </label>
-
-          <Input
-            id="last-contact-to"
-            type="date"
-            value={filters.lastContactTo}
-            onChange={(event) =>
-              updateFilters({
-                lastContactTo: event.target.value,
-              })
-            }
-          />
-        </div>
-      </div>
+      
     </div>
   );
 }

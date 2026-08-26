@@ -8,6 +8,7 @@ import {
 import { CustomerTable } from "@/components/customers/customer-table";
 import { CustomerPagination } from "@/components/customers/customer-pagination";
 import { Button } from "@/components/ui/button";
+import { AdvancedCustomerFilters } from "@/components/customers/advanced-customer-filters";
 import {
   defaultCustomerFilters,
   filterCustomers,
@@ -83,10 +84,20 @@ export function CustomerList() {
         </p>
       )}
 
-      <CustomerToolbar
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <CustomerToolbar
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+        />
+
+        {customers && (
+          <AdvancedCustomerFilters
+            customers={customers}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+          />
+        )}
+      </div>
 
       {!isLoading && hasAnyCustomers && filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-md border border-border py-16 text-center">
