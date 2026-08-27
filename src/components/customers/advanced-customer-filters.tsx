@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { FilterIcon } from "@hugeicons/core-free-icons";
 import {
   DndContext,
   PointerSensor,
@@ -32,6 +33,11 @@ import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 
 import type { Customer } from "@/types/customer";
 import type { CustomerFilters } from "@/lib/customer-filters";
+
+import {
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 interface AdvancedCustomerFiltersProps {
   customers: Customer[];
@@ -503,11 +509,18 @@ export function AdvancedCustomerFilters({
       open={open}
       onOpenChange={handleOpenChange}
     >
-      <SheetTrigger>
-        <span>Filters</span>
-        
+      <SheetTrigger
+        aria-label="Open filters"
+        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+      >
+        <HugeiconsIcon
+          icon={FilterIcon}
+          className="size-4"
+          aria-hidden="true"
+        />
+
         {appliedFilterCount > 0 && (
-          <span className="ml-1.5 rounded-full bg-foreground px-1.5 py-0.5 text-[10px] leading-none text-background">
+          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-foreground text-[9px] font-medium leading-none text-background">
             {appliedFilterCount}
           </span>
         )}
@@ -515,7 +528,7 @@ export function AdvancedCustomerFilters({
 
       <SheetContent
         side="right"
-        className="flex h-[min(720px,calc(100vh-32px))] w-full flex-col gap-0 overflow-hidden rounded-l-xl p-0 sm:max-w-md"
+        className="flex h-full w-full flex-col gap-0 overflow-visible !border-0 bg-transparent p-0 shadow-none sm:max-w-none [&>button]:hidden"
       >
         <div className="absolute right-0 top-1/2 flex h-[min(720px,calc(100vh-2rem))] w-full -translate-y-1/2 flex-col overflow-hidden rounded-l-xl border border-border bg-background shadow-2xl sm:w-[380px]">
           {/* Header */}
@@ -543,6 +556,19 @@ export function AdvancedCustomerFilters({
                     Clear all
                   </Button>
                 )}
+
+                <button
+                  type="button"
+                  aria-label="Close filters"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    className="size-4"
+                    aria-hidden="true"
+                  />
+                </button>
               </div>
             </div>
           </SheetHeader>
