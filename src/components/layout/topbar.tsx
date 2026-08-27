@@ -18,6 +18,11 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 
 export function Topbar() {
@@ -98,17 +103,51 @@ export function Topbar() {
           />
         </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="View notifications"
-        >
-          <HugeiconsIcon
-            icon={Notification03Icon}
-            className="size-4"
-          />
-        </Button>
+        <Popover>
+          <PopoverTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="View notifications"
+                title="Notifications"
+              />
+            }
+          >
+            <HugeiconsIcon
+              icon={Notification03Icon}
+              className="size-4"
+            />
+          </PopoverTrigger>
+
+          <PopoverContent
+            align="end"
+            className="w-80 p-0"
+          >
+            <div className="border-b border-border px-4 py-3">
+              <h2 className="text-sm font-semibold">
+                Notifications
+              </h2>
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                Recent activity from your CRM.
+              </p>
+            </div>
+
+            <div className="flex min-h-32 items-center justify-center px-4 py-6 text-center">
+              <div>
+                <p className="text-sm font-medium">
+                  No new notifications
+                </p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  You&apos;re all caught up.
+                </p>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
 
         <Avatar className="size-7">
           <AvatarFallback>VM</AvatarFallback>
