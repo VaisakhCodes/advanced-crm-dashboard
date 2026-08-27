@@ -47,7 +47,7 @@ export function SortableCustomerRow({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition ?? undefined,
   };
 
   return (
@@ -57,7 +57,7 @@ export function SortableCustomerRow({
       data-state={isSelected ? "selected" : undefined}
       className={
         isDragging
-          ? "relative z-10 bg-muted shadow-sm"
+          ? "relative z-10 bg-muted"
           : isSelected
             ? "bg-muted/50"
             : undefined
