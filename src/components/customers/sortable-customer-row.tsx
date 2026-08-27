@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useSortable,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 
@@ -58,12 +56,16 @@ export function SortableCustomerRow({
       <TableCell className="w-10 px-2">
         <button
           type="button"
-          className="flex size-8 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
           {...attributes}
           {...listeners}
+          className="touch-none flex size-8 cursor-grab items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 active:cursor-grabbing"
           aria-label={`Reorder ${customer.name}`}
+          title={`Drag to reorder ${customer.name}`}
         >
-          <GripVertical className="size-4" />
+          <GripVertical
+            className="size-4"
+            aria-hidden="true"
+          />
         </button>
       </TableCell>
 
