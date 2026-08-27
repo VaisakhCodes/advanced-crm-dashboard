@@ -11,7 +11,7 @@ import {
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -150,7 +150,11 @@ export function Topbar() {
         </Popover>
 
         <Avatar className="size-7">
-          <AvatarFallback>VM</AvatarFallback>
+          <AvatarImage
+            src="/profile.jpg"
+            alt="Profile"
+            className="object-cover"
+          />
         </Avatar>
       </div>
     </header>
