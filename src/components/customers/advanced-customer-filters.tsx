@@ -28,6 +28,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
+
 import type { Customer } from "@/types/customer";
 import type { CustomerFilters } from "@/lib/customer-filters";
 
@@ -265,6 +267,14 @@ export function AdvancedCustomerFilters({
     setOpen(nextOpen);
   }
 
+  useKeyboardShortcut({
+    key: "k",
+    ctrlOrMeta: true,
+    callback: () => {
+      handleOpenChange(true);
+    },
+  });
+
   function updateDraftFilters(
     changes: Partial<CustomerFilters>
   ) {
@@ -494,7 +504,11 @@ export function AdvancedCustomerFilters({
       onOpenChange={handleOpenChange}
     >
       <SheetTrigger>
-        Filters
+        <span>Filters</span>
+
+        <kbd className="ml-2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+          Ctrl K
+        </kbd>
 
         {appliedFilterCount > 0 && (
           <span className="ml-1.5 rounded-full bg-foreground px-1.5 py-0.5 text-[10px] leading-none text-background">
@@ -505,476 +519,476 @@ export function AdvancedCustomerFilters({
 
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
+        className="flex h-[min(720px,calc(100vh-32px))] w-full flex-col gap-0 overflow-hidden rounded-l-xl p-0 sm:max-w-md"
       >
-        {/* Header */}
-        <SheetHeader className="shrink-0 border-b px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <SheetTitle className="text-base">
-                Filters
-              </SheetTitle>
+        <div className="absolute right-0 top-1/2 flex h-[min(720px,calc(100vh-2rem))] w-full -translate-y-1/2 flex-col overflow-hidden rounded-l-xl border border-border bg-background shadow-2xl sm:w-[380px]">
+          {/* Header */}
+          <SheetHeader className="shrink-0 border-b px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <SheetTitle className="text-base">
+                  Filters
+                </SheetTitle>
 
-              <SheetDescription className="text-xs">
-                Refine the customer list.
-              </SheetDescription>
-            </div>
+                <SheetDescription className="text-xs">
+                  Refine the customer list.
+                </SheetDescription>
+              </div>
 
-            <div className="flex items-center gap-1">
-              {draftFilterCount > 0 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearAllFilters}
-                  className="h-7 px-2 text-xs"
-                >
-                  Clear all
-                </Button>
-              )}
-            </div>
-          </div>
-        </SheetHeader>
-
-        {/* Scrollable body */}
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-3 px-4 py-3">
-            {/* Save current filter */}
-            <section className="space-y-2">
-              {!saveMode ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-full text-xs"
-                  disabled={draftFilterCount === 0}
-                  onClick={() => setSaveMode(true)}
-                >
-                  Save current filter
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <label
-                    htmlFor="saved-filter-name"
-                    className="text-xs font-medium"
+              <div className="flex items-center gap-1">
+                {draftFilterCount > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="h-7 px-2 text-xs"
                   >
-                    Filter name
-                  </label>
+                    Clear all
+                  </Button>
+                )}
+              </div>
+            </div>
+          </SheetHeader>
 
-                  <div className="flex gap-2">
-                    <Input
-                      id="saved-filter-name"
-                      value={saveName}
-                      onChange={(event) =>
-                        setSaveName(
-                          event.target.value
-                        )
-                      }
-                      placeholder="e.g. Active customers"
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          saveCurrentFilter();
-                        }
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+            <div className="flex flex-col gap-4">
+              {/* Save filter */}
+              <section className="space-y-2">
+                {!saveMode ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-full"
+                    disabled={draftFilterCount === 0}
+                    onClick={() => setSaveMode(true)}
+                  >
+                    Save current filter
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="saved-filter-name"
+                      className="text-xs font-medium"
+                    >
+                      Filter name
+                    </label>
 
-                        if (event.key === "Escape") {
-                          setSaveMode(false);
-                          setSaveName("");
+                    <div className="flex gap-2">
+                      <Input
+                        id="saved-filter-name"
+                        value={saveName}
+                        onChange={(event) =>
+                          setSaveName(event.target.value)
                         }
-                      }}
-                      autoFocus
-                      className="h-8"
-                    />
+                        placeholder="e.g. Active Customers"
+                        className="h-8"
+                        autoFocus
+                      />
+
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-8 shrink-0"
+                        disabled={!saveName.trim()}
+                        onClick={saveCurrentFilter}
+                      >
+                        Save
+                      </Button>
+                    </div>
 
                     <Button
                       type="button"
+                      variant="ghost"
                       size="sm"
-                      className="h-8"
-                      disabled={!saveName.trim()}
-                      onClick={saveCurrentFilter}
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        setSaveMode(false);
+                        setSaveName("");
+                      }}
                     >
-                      Save
+                      Cancel
                     </Button>
                   </div>
-                </div>
-              )}
-            </section>
+                )}
+              </section>
 
-            {/* Status */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Status
-                </h3>
+              {/* Status */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Status
+                  </h3>
 
-                <p className="text-[11px] text-muted-foreground">
-                  Select one or more statuses.
-                </p>
-              </div>
-
-              <div className="flex gap-5">
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={draftFilters.statuses.includes(
-                      "active"
-                    )}
-                    onChange={() =>
-                      toggleStatus("active")
-                    }
-                    className="size-3.5"
-                  />
-
-                  <span>Active</span>
-                </label>
-
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={draftFilters.statuses.includes(
-                      "inactive"
-                    )}
-                    onChange={() =>
-                      toggleStatus("inactive")
-                    }
-                    className="size-3.5"
-                  />
-
-                  <span>Inactive</span>
-                </label>
-              </div>
-            </section>
-
-            {/* Company */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Company
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Select one or more companies.
-                </p>
-              </div>
-
-              <div className="rounded-md border border-border">
-                <div className="min-h-8 border-b px-2.5 py-1.5">
-                  {draftFilters.companies.length ===
-                  0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      All companies
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {draftFilters.companies.map(
-                        (company) => (
-                          <span
-                            key={company}
-                            className="rounded-full bg-muted px-2 py-0.5 text-[10px]"
-                          >
-                            {company}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="max-h-24 overflow-y-auto p-1.5">
-                  {companies.length === 0 ? (
-                    <p className="px-2 py-2 text-xs text-muted-foreground">
-                      No companies available.
-                    </p>
-                  ) : (
-                    <div className="space-y-0.5">
-                      {companies.map((company) => (
-                        <label
-                          key={company}
-                          className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs hover:bg-muted"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={draftFilters.companies.includes(
-                              company
-                            )}
-                            onChange={() =>
-                              toggleCompany(company)
-                            }
-                            className="size-3.5"
-                          />
-
-                          <span className="truncate">
-                            {company}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Last contact */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Last contact
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Filter by last contact date.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="space-y-1">
-                  <label
-                    htmlFor="advanced-last-contact-from"
-                    className="text-[11px] text-muted-foreground"
-                  >
-                    From
-                  </label>
-
-                  <Input
-                    id="advanced-last-contact-from"
-                    type="date"
-                    value={
-                      draftFilters.lastContactFrom
-                    }
-                    onChange={(event) =>
-                      updateDraftFilters({
-                        lastContactFrom:
-                          event.target.value,
-                      })
-                    }
-                    className="h-8"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label
-                    htmlFor="advanced-last-contact-to"
-                    className="text-[11px] text-muted-foreground"
-                  >
-                    To
-                  </label>
-
-                  <Input
-                    id="advanced-last-contact-to"
-                    type="date"
-                    value={draftFilters.lastContactTo}
-                    onChange={(event) =>
-                      updateDraftFilters({
-                        lastContactTo:
-                          event.target.value,
-                      })
-                    }
-                    className="h-8"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Phone */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Phone number
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Search by partial phone number.
-                </p>
-              </div>
-
-              <Input
-                type="search"
-                placeholder="Search phone number..."
-                value={draftFilters.phone}
-                onChange={(event) =>
-                  updateDraftFilters({
-                    phone: event.target.value,
-                  })
-                }
-                className="h-8"
-              />
-            </section>
-
-            {/* Email */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Email
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Search by partial email address.
-                </p>
-              </div>
-
-              <Input
-                type="search"
-                placeholder="Search email..."
-                value={draftFilters.email}
-                onChange={(event) =>
-                  updateDraftFilters({
-                    email: event.target.value,
-                  })
-                }
-                className="h-8"
-              />
-            </section>
-
-            {/* Filter templates */}
-            <section className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Filter templates
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Quickly apply a common customer filter.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2 text-[11px]"
-                  onClick={() =>
-                    applyTemplate("active")
-                  }
-                >
-                  Active
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2 text-[11px]"
-                  onClick={() =>
-                    applyTemplate("recent")
-                  }
-                >
-                  Recent
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2 text-[11px]"
-                  onClick={() =>
-                    applyTemplate("inactive")
-                  }
-                >
-                  Inactive
-                </Button>
-              </div>
-            </section>
-
-            {/* Saved filters */}
-            <section className="space-y-2 pb-2">
-              <div>
-                <h3 className="text-xs font-medium">
-                  Saved Filters
-                </h3>
-
-                <p className="text-[11px] text-muted-foreground">
-                  Reuse filter combinations you&apos;ve
-                  saved. Drag to reorder.
-                </p>
-              </div>
-
-              {savedFilters.length === 0 ? (
-                <div className="rounded-md border border-dashed border-border px-3 py-3 text-center">
-                  <p className="text-xs text-muted-foreground">
-                    No saved filters yet.
+                  <p className="text-[11px] text-muted-foreground">
+                    Select one or more statuses.
                   </p>
                 </div>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={
-                    handleSavedFilterDragEnd
-                  }
-                >
-                  <SortableContext
-                    items={savedFilters.map(
-                      (savedFilter) =>
-                        savedFilter.id
+
+                <div className="space-y-1.5">
+                  <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs hover:bg-muted">
+                    <input
+                      type="checkbox"
+                      checked={draftFilters.statuses.includes(
+                        "active"
+                      )}
+                      onChange={() =>
+                        toggleStatus("active")
+                      }
+                      className="size-3.5"
+                    />
+                    Active
+                  </label>
+
+                  <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs hover:bg-muted">
+                    <input
+                      type="checkbox"
+                      checked={draftFilters.statuses.includes(
+                        "inactive"
+                      )}
+                      onChange={() =>
+                        toggleStatus("inactive")
+                      }
+                      className="size-3.5"
+                    />
+                    Inactive
+                  </label>
+                </div>
+              </section>
+
+              {/* Company */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Company
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Select one or more companies.
+                  </p>
+                </div>
+
+                <div className="rounded-md border border-border">
+                  <div className="min-h-8 border-b px-2.5 py-1.5">
+                    {draftFilters.companies.length ===
+                    0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        All companies
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {draftFilters.companies.map(
+                          (company) => (
+                            <span
+                              key={company}
+                              className="rounded-full bg-muted px-2 py-0.5 text-[10px]"
+                            >
+                              {company}
+                            </span>
+                          )
+                        )}
+                      </div>
                     )}
-                    strategy={
-                      verticalListSortingStrategy
+                  </div>
+
+                  <div className="max-h-24 overflow-y-auto p-1.5">
+                    {companies.length === 0 ? (
+                      <p className="px-2 py-2 text-xs text-muted-foreground">
+                        No companies available.
+                      </p>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {companies.map((company) => (
+                          <label
+                            key={company}
+                            className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs hover:bg-muted"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={draftFilters.companies.includes(
+                                company
+                              )}
+                              onChange={() =>
+                                toggleCompany(company)
+                              }
+                              className="size-3.5"
+                            />
+
+                            <span className="truncate">
+                              {company}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Last contact */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Last contact
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Filter by last contact date.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="advanced-last-contact-from"
+                      className="text-[11px] text-muted-foreground"
+                    >
+                      From
+                    </label>
+
+                    <Input
+                      id="advanced-last-contact-from"
+                      type="date"
+                      value={
+                        draftFilters.lastContactFrom
+                      }
+                      onChange={(event) =>
+                        updateDraftFilters({
+                          lastContactFrom:
+                            event.target.value,
+                        })
+                      }
+                      className="h-8"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="advanced-last-contact-to"
+                      className="text-[11px] text-muted-foreground"
+                    >
+                      To
+                    </label>
+
+                    <Input
+                      id="advanced-last-contact-to"
+                      type="date"
+                      value={draftFilters.lastContactTo}
+                      onChange={(event) =>
+                        updateDraftFilters({
+                          lastContactTo:
+                            event.target.value,
+                        })
+                      }
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Phone */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Phone number
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Search by partial phone number.
+                  </p>
+                </div>
+
+                <Input
+                  type="search"
+                  placeholder="Search phone number..."
+                  value={draftFilters.phone}
+                  onChange={(event) =>
+                    updateDraftFilters({
+                      phone: event.target.value,
+                    })
+                  }
+                  className="h-8"
+                />
+              </section>
+
+              {/* Email */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Email
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Search by partial email address.
+                  </p>
+                </div>
+
+                <Input
+                  type="search"
+                  placeholder="Search email..."
+                  value={draftFilters.email}
+                  onChange={(event) =>
+                    updateDraftFilters({
+                      email: event.target.value,
+                    })
+                  }
+                  className="h-8"
+                />
+              </section>
+
+              {/* Filter templates */}
+              <section className="space-y-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Filter templates
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Quickly apply a common customer filter.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2 text-[11px]"
+                    onClick={() =>
+                      applyTemplate("active")
                     }
                   >
-                    <div className="space-y-1.5">
-                      {savedFilters.map(
-                        (savedFilter) => (
-                          <SortableSavedFilter
-                            key={savedFilter.id}
-                            savedFilter={savedFilter}
-                            onApply={() =>
-                              applySavedFilter(
-                                savedFilter
-                              )
-                            }
-                            onDelete={() =>
-                              deleteSavedFilter(
-                                savedFilter.id
-                              )
-                            }
-                          />
-                        )
+                    Active
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2 text-[11px]"
+                    onClick={() =>
+                      applyTemplate("recent")
+                    }
+                  >
+                    Recent
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2 text-[11px]"
+                    onClick={() =>
+                      applyTemplate("inactive")
+                    }
+                  >
+                    Inactive
+                  </Button>
+                </div>
+              </section>
+
+              {/* Saved filters */}
+              <section className="space-y-2 pb-2">
+                <div>
+                  <h3 className="text-xs font-medium">
+                    Saved Filters
+                  </h3>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Reuse filter combinations you&apos;ve
+                    saved. Drag to reorder.
+                  </p>
+                </div>
+
+                {savedFilters.length === 0 ? (
+                  <div className="rounded-md border border-dashed border-border px-3 py-3 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      No saved filters yet.
+                    </p>
+                  </div>
+                ) : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={
+                      handleSavedFilterDragEnd
+                    }
+                  >
+                    <SortableContext
+                      items={savedFilters.map(
+                        (savedFilter) =>
+                          savedFilter.id
                       )}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </section>
+                      strategy={
+                        verticalListSortingStrategy
+                      }
+                    >
+                      <div className="space-y-1.5">
+                        {savedFilters.map(
+                          (savedFilter) => (
+                            <SortableSavedFilter
+                              key={savedFilter.id}
+                              savedFilter={savedFilter}
+                              onApply={() =>
+                                applySavedFilter(
+                                  savedFilter
+                                )
+                              }
+                              onDelete={() =>
+                                deleteSavedFilter(
+                                  savedFilter.id
+                                )
+                              }
+                            />
+                          )
+                        )}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+              </section>
+            </div>
           </div>
-        </div>
 
-        {/* Fixed footer */}
-        <div className="shrink-0 border-t bg-background px-4 py-3">
-          <div className="mb-2 text-[11px] text-muted-foreground">
-            {draftFilterCount === 0
-              ? "No filters selected."
-              : `${draftFilterCount} ${
-                  draftFilterCount === 1
-                    ? "filter"
-                    : "filters"
-                } selected.`}
-          </div>
+          {/* Fixed footer */}
+          <div className="shrink-0 border-t bg-background px-4 py-3">
+            <div className="mb-2 text-[11px] text-muted-foreground">
+              {draftFilterCount === 0
+                ? "No filters selected."
+                : `${draftFilterCount} ${
+                    draftFilterCount === 1
+                      ? "filter"
+                      : "filters"
+                  } selected.`}
+            </div>
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 flex-1"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 flex-1"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
 
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 flex-1"
-              onClick={handleApply}
-            >
-              Apply Filters
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 flex-1"
+                onClick={handleApply}
+              >
+                Apply Filters
 
-              {draftFilterCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-background/20 px-1.5 py-0.5 text-[10px]">
-                  {draftFilterCount}
-                </span>
-              )}
-            </Button>
+                {draftFilterCount > 0 && (
+                  <span className="ml-1.5 rounded-full bg-background/20 px-1.5 py-0.5 text-[10px]">
+                    {draftFilterCount}
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </SheetContent>
