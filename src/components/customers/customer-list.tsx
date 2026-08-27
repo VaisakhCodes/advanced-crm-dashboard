@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { downloadCustomersCsv } from "@/lib/export-customers";
+
 import {
   useCustomers,
   useBulkDeleteCustomers,
@@ -269,23 +270,28 @@ export function CustomerList() {
         </p>
       )}
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <CustomerToolbar
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onExportCsv={handleExportCsv}
-          exportDisabled={filtered.length === 0}
-        />
-
-        {customers && (
-          <AdvancedCustomerFilters
-            customers={customers}
+      {/* Toolbar + Filters */}
+      <div className="flex w-full flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0 flex-1">
+          <CustomerToolbar
             filters={filters}
             onFiltersChange={handleFiltersChange}
+            onExport={handleExportCsv}
           />
+        </div>
+
+        {customers && (
+          <div className="flex shrink-0 items-center">
+            <AdvancedCustomerFilters
+              customers={customers}
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+          </div>
         )}
       </div>
 
+      {/* Bulk Actions */}
       {selectedCount > 0 && (
         <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm font-medium">
@@ -362,6 +368,7 @@ export function CustomerList() {
         </div>
       )}
 
+      {/* Customer Content */}
       {!isLoading &&
       hasAnyCustomers &&
       filtered.length === 0 ? (
