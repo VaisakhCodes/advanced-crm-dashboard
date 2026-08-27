@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
+
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -12,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import type { CustomerFilters } from "@/lib/customer-filters";
 import type { CustomerStatus } from "@/types/customer";
 
@@ -20,11 +24,15 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface CustomerToolbarProps {
   filters: CustomerFilters;
   onFiltersChange: (filters: CustomerFilters) => void;
+  onExportCsv: () => void;
+  exportDisabled: boolean;
 }
 
 export function CustomerToolbar({
   filters,
   onFiltersChange,
+  onExportCsv,
+  exportDisabled,
 }: CustomerToolbarProps) {
   const searchTimeoutRef = useRef<number | null>(null);
 
@@ -36,7 +44,9 @@ export function CustomerToolbar({
     };
   }, []);
 
-  function updateFilters(changes: Partial<CustomerFilters>) {
+  function updateFilters(
+    changes: Partial<CustomerFilters>
+  ) {
     onFiltersChange({
       ...filters,
       ...changes,
@@ -123,9 +133,11 @@ export function CustomerToolbar({
               <SelectItem value="all">
                 All statuses
               </SelectItem>
+
               <SelectItem value="active">
                 Active
               </SelectItem>
+
               <SelectItem value="inactive">
                 Inactive
               </SelectItem>
@@ -133,12 +145,24 @@ export function CustomerToolbar({
           </Select>
         </div>
 
-        <Link
-          href="/customers/new"
-          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          Add Customer
-        </Link>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={exportDisabled}
+            onClick={onExportCsv}
+          >
+            Export CSV
+          </Button>
+
+          <Link
+            href="/customers/new"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Add Customer
+          </Link>
+        </div>
       </div>
     </div>
   );

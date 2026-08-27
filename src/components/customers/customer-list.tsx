@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
+import { downloadCustomersCsv } from "@/lib/export-customers";
 import {
   useCustomers,
   useBulkDeleteCustomers,
@@ -38,27 +38,19 @@ export function CustomerList() {
     refetch,
   } = useCustomers();
 
-  const bulkUpdateCustomers =
-    useBulkUpdateCustomers();
-
-  const bulkDeleteCustomers =
-    useBulkDeleteCustomers();
-
-  const reorderCustomers =
-    useReorderCustomers();
+  const bulkUpdateCustomers = useBulkUpdateCustomers();
+  const bulkDeleteCustomers = useBulkDeleteCustomers();
+  const reorderCustomers = useReorderCustomers();
 
   const [filters, setFilters] =
-    useState<CustomerFilters>(
-      defaultCustomerFilters
-    );
+    useState<CustomerFilters>(defaultCustomerFilters);
 
   const [page, setPage] = useState(1);
 
   const [selectedIds, setSelectedIds] =
     useState<Set<string>>(new Set());
 
-  const [bulkDeleteOpen, setBulkDeleteOpen] =
-    useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const [sortField, setSortField] =
     useState<CustomerSortField | null>(null);
@@ -84,16 +76,13 @@ export function CustomerList() {
     setSortField((currentField) => {
       if (currentField === field) {
         setSortDirection((currentDirection) =>
-          currentDirection === "asc"
-            ? "desc"
-            : "asc"
+          currentDirection === "asc" ? "desc" : "asc"
         );
 
         return currentField;
       }
 
       setSortDirection("asc");
-
       return field;
     });
 
@@ -124,10 +113,7 @@ export function CustomerList() {
     Math.ceil(filtered.length / PAGE_SIZE)
   );
 
-  const currentPage = Math.min(
-    page,
-    totalPages
-  );
+  const currentPage = Math.min(page, totalPages);
 
   const pageItems = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -240,6 +226,14 @@ export function CustomerList() {
     }
   }
 
+  function handleExportCsv() {
+    if (filtered.length === 0) {
+      return;
+    }
+
+    downloadCustomersCsv(filtered);
+  }
+
   function handlePageChange(nextPage: number) {
     setPage(nextPage);
     clearSelection();
@@ -279,6 +273,8 @@ export function CustomerList() {
         <CustomerToolbar
           filters={filters}
           onFiltersChange={handleFiltersChange}
+          onExportCsv={handleExportCsv}
+          exportDisabled={filtered.length === 0}
         />
 
         {customers && (
