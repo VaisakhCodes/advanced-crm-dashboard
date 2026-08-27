@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { CustomerOverview } from "@/components/dashboard/customer-overview";
 
 export default function Home() {
   return (
@@ -16,6 +17,8 @@ export default function Home() {
         </header>
 
         <DashboardStats />
+
+        <CustomerOverview />
       </div>
     </AppShell>
   );
