@@ -14,6 +14,7 @@ interface DeleteCustomerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customerName: string;
+  count: number;
   onConfirm: () => void;
   isDeleting: boolean;
 }
@@ -22,19 +23,27 @@ export function DeleteCustomerDialog({
   open,
   onOpenChange,
   customerName,
+  count,
   onConfirm,
   isDeleting,
 }: DeleteCustomerDialogProps) {
+  const isBulkDelete = count > 1;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete {customerName}?</DialogTitle>
+          <DialogTitle>
+            Delete {customerName}?
+          </DialogTitle>
+
           <DialogDescription>
-            This will permanently remove this customer. This action cannot be
-            undone.
+            This will permanently remove{" "}
+            {isBulkDelete ? "these customers" : "this customer"}.{" "}
+            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
+
         <DialogFooter>
           <Button
             variant="outline"
@@ -43,12 +52,17 @@ export function DeleteCustomerDialog({
           >
             Cancel
           </Button>
+
           <Button
             variant="destructive"
             onClick={onConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? "Deleting..." : "Delete customer"}
+            {isDeleting
+              ? "Deleting..."
+              : isBulkDelete
+                ? "Delete customers"
+                : "Delete customer"}
           </Button>
         </DialogFooter>
       </DialogContent>

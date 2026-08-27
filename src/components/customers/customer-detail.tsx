@@ -263,6 +263,7 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         customerName={customer.name}
+        count={1}
         onConfirm={handleDelete}
         isDeleting={deleteCustomer.isPending}
       />

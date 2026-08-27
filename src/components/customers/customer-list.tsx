@@ -1,18 +1,24 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useCustomers } from "@/hooks/use-customers";
+import {
+  useCustomers,
+  useBulkDeleteCustomers,
+  useBulkUpdateCustomers,
+} from "@/hooks/use-customers";
 import { CustomerToolbar } from "@/components/customers/customer-toolbar";
 import { CustomerTable } from "@/components/customers/customer-table";
 import { CustomerPagination } from "@/components/customers/customer-pagination";
-import { Button } from "@/components/ui/button";
 import { AdvancedCustomerFilters } from "@/components/customers/advanced-customer-filters";
+import { DeleteCustomerDialog } from "@/components/customers/delete-customer-dialog";
+import { Button } from "@/components/ui/button";
 import {
   defaultCustomerFilters,
   filterCustomers,
   hasActiveCustomerFilters,
   type CustomerFilters,
 } from "@/lib/customer-filters";
+import type { CustomerStatus } from "@/types/customer";
 
 const PAGE_SIZE = 10;
 
@@ -24,19 +30,30 @@ export function CustomerList() {
     refetch,
   } = useCustomers();
 
+  const bulkUpdateCustomers = useBulkUpdateCustomers();
+  const bulkDeleteCustomers = useBulkDeleteCustomers();
+
   const [filters, setFilters] =
     useState<CustomerFilters>(defaultCustomerFilters);
 
   const [page, setPage] = useState(1);
 
+  const [selectedIds, setSelectedIds] =
+    useState<Set<string>>(new Set());
+
+  const [bulkDeleteOpen, setBulkDeleteOpen] =
+    useState(false);
+
   function handleFiltersChange(nextFilters: CustomerFilters) {
     setFilters(nextFilters);
     setPage(1);
+    setSelectedIds(new Set());
   }
 
   function handleResetFilters() {
     setFilters(defaultCustomerFilters);
     setPage(1);
+    setSelectedIds(new Set());
   }
 
   const filtered = useMemo(() => {
@@ -59,8 +76,97 @@ export function CustomerList() {
     currentPage * PAGE_SIZE
   );
 
-  const hasFiltersApplied = hasActiveCustomerFilters(filters);
-  const hasAnyCustomers = (customers?.length ?? 0) > 0;
+  const hasFiltersApplied =
+    hasActiveCustomerFilters(filters);
+
+  const hasAnyCustomers =
+    (customers?.length ?? 0) > 0;
+
+  const selectedCount = selectedIds.size;
+  function handleToggleCustomer(id: string) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+  }
+
+  function handleToggleAll() {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+
+      const allSelected =
+        pageItems.length > 0 &&
+        pageItems.every((customer) =>
+          next.has(customer.id)
+        );
+
+      if (allSelected) {
+        pageItems.forEach((customer) =>
+          next.delete(customer.id)
+        );
+      } else {
+        pageItems.forEach((customer) =>
+          next.add(customer.id)
+        );
+      }
+
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  async function handleBulkStatusUpdate(
+    status: CustomerStatus
+  ) {
+    const ids = Array.from(selectedIds);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    try {
+      await bulkUpdateCustomers.mutateAsync({
+        ids,
+        status,
+      });
+
+      clearSelection();
+    } catch {
+      // Keep the selection so the user can retry.
+    }
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    try {
+      await bulkDeleteCustomers.mutateAsync(ids);
+
+      clearSelection();
+      setBulkDeleteOpen(false);
+    } catch {
+      // Keep the dialog open so the user can retry.
+    }
+  }
+
+  function handlePageChange(nextPage: number) {
+    setPage(nextPage);
+    clearSelection();
+  }
 
   if (isError) {
     return (
@@ -107,6 +213,78 @@ export function CustomerList() {
         )}
       </div>
 
+      {selectedCount > 0 && (
+        <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm font-medium">
+            {selectedCount}{" "}
+            {selectedCount === 1
+              ? "customer"
+              : "customers"}{" "}
+            selected
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={
+                bulkUpdateCustomers.isPending ||
+                bulkDeleteCustomers.isPending
+              }
+              onClick={() =>
+                handleBulkStatusUpdate("active")
+              }
+            >
+              Set Active
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={
+                bulkUpdateCustomers.isPending ||
+                bulkDeleteCustomers.isPending
+              }
+              onClick={() =>
+                handleBulkStatusUpdate("inactive")
+              }
+            >
+              Set Inactive
+            </Button>
+
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={
+                bulkUpdateCustomers.isPending ||
+                bulkDeleteCustomers.isPending
+              }
+              onClick={() =>
+                setBulkDeleteOpen(true)
+              }
+            >
+              Delete
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={
+                bulkUpdateCustomers.isPending ||
+                bulkDeleteCustomers.isPending
+              }
+              onClick={clearSelection}
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+      )}
+
       {!isLoading &&
       hasAnyCustomers &&
       filtered.length === 0 ? (
@@ -138,17 +316,33 @@ export function CustomerList() {
           <CustomerTable
             customers={pageItems}
             isLoading={isLoading}
+            selectedIds={selectedIds}
+            onToggleCustomer={handleToggleCustomer}
+            onToggleAll={handleToggleAll}
           />
 
           {!isLoading && filtered.length > 0 && (
             <CustomerPagination
               page={currentPage}
               totalPages={totalPages}
-              onPageChange={setPage}
+              onPageChange={handlePageChange}
             />
           )}
         </>
       )}
+
+      <DeleteCustomerDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        customerName={`${selectedCount} ${
+          selectedCount === 1
+            ? "customer"
+            : "customers"
+        }`}
+        count={selectedCount}
+        onConfirm={handleBulkDelete}
+        isDeleting={bulkDeleteCustomers.isPending}
+      />
     </div>
   );
 }
