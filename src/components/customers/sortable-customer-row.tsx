@@ -16,8 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
 import { formatDate } from "@/lib/format-date";
 import type { Customer } from "@/types/customer";
 
@@ -65,13 +63,12 @@ export function SortableCustomerRow({
             : undefined
       }
     >
-      {/* Reorder */}
       <TableCell className="w-10 px-2">
         <button
           type="button"
           {...attributes}
           {...listeners}
-          className="touch-none flex size-8 cursor-grab items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 active:cursor-grabbing"
+          className="flex size-8 touch-none cursor-grab items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 active:cursor-grabbing"
           aria-label={`Reorder ${customer.name}`}
           title={`Drag to reorder ${customer.name}`}
         >
@@ -82,7 +79,6 @@ export function SortableCustomerRow({
         </button>
       </TableCell>
 
-      {/* Selection */}
       <TableCell className="w-10 px-3">
         <input
           type="checkbox"
@@ -95,7 +91,6 @@ export function SortableCustomerRow({
         />
       </TableCell>
 
-      {/* Customer */}
       <TableCell className="min-w-[180px]">
         <div className="flex min-w-0 flex-col">
           <Link
@@ -111,22 +106,18 @@ export function SortableCustomerRow({
         </div>
       </TableCell>
 
-      {/* Company */}
       <TableCell className="min-w-[160px] text-muted-foreground">
         {customer.company}
       </TableCell>
 
-      {/* Email */}
       <TableCell className="min-w-[220px] text-muted-foreground">
         {customer.email}
       </TableCell>
 
-      {/* Phone */}
       <TableCell className="min-w-[140px] text-muted-foreground">
         {customer.phone}
       </TableCell>
 
-      {/* Status */}
       <TableCell className="min-w-[100px]">
         <Badge
           variant={
@@ -140,45 +131,39 @@ export function SortableCustomerRow({
         </Badge>
       </TableCell>
 
-      {/* Last contact */}
       <TableCell className="min-w-[140px] text-muted-foreground">
         {formatDate(customer.lastContactDate)}
       </TableCell>
 
-      {/* Actions */}
-      <TableCell className="w-[100px]">
+      <TableCell className="sticky right-0 z-10 w-[100px] bg-background">
         <div className="flex items-center justify-end gap-1">
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            aria-label={`Edit ${customer.name}`}
-            title="Edit customer"
             onClick={() => onEdit(customer)}
+            className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`Edit ${customer.name}`}
+            title={`Edit ${customer.name}`}
           >
             <HugeiconsIcon
               icon={Edit02Icon}
               className="size-4"
               aria-hidden="true"
             />
-          </Button>
+          </button>
 
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-destructive"
-            aria-label={`Delete ${customer.name}`}
-            title="Delete customer"
             onClick={() => onDelete(customer)}
+            className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`Delete ${customer.name}`}
+            title={`Delete ${customer.name}`}
           >
             <HugeiconsIcon
               icon={Delete02Icon}
               className="size-4"
               aria-hidden="true"
             />
-          </Button>
+          </button>
         </div>
       </TableCell>
     </TableRow>

@@ -247,7 +247,7 @@ export function CustomerTable({
                   />
                 </TableHead>
 
-                <TableHead className="w-[100px] text-right">
+                <TableHead className="sticky right-0 z-20 w-[100px] bg-background text-right">
                   Actions
                 </TableHead>
               </TableRow>
