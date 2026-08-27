@@ -3,13 +3,16 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+
 import {
   getCustomers,
   getCustomerById,
   createCustomer,
   updateCustomer,
   deleteCustomer,
+  reorderCustomers,
 } from "@/lib/customer-service";
+
 import type {
   CreateCustomerInput,
   CustomerStatus,
@@ -18,7 +21,9 @@ import type {
 
 export const customerKeys = {
   all: ["customers"] as const,
-  detail: (id: string) => ["customers", id] as const,
+
+  detail: (id: string) =>
+    ["customers", id] as const,
 };
 
 export function useCustomers() {
@@ -40,7 +45,9 @@ export function useCreateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateCustomerInput) => createCustomer(input),
+    mutationFn: (input: CreateCustomerInput) =>
+      createCustomer(input),
+
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: customerKeys.all,
@@ -67,7 +74,9 @@ export function useUpdateCustomer() {
       });
 
       queryClient.invalidateQueries({
-        queryKey: customerKeys.detail(variables.id),
+        queryKey: customerKeys.detail(
+          variables.id
+        ),
       });
     },
   });
@@ -77,7 +86,8 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteCustomer(id),
+    mutationFn: (id: string) =>
+      deleteCustomer(id),
 
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({
@@ -91,11 +101,30 @@ export function useDeleteCustomer() {
   });
 }
 
+export function useReorderCustomers() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      activeId,
+      overId,
+    }: {
+      activeId: string;
+      overId: string;
+    }) =>
+      reorderCustomers(activeId, overId),
+
+    onSuccess: (customers) => {
+      queryClient.setQueryData(
+        customerKeys.all,
+        customers
+      );
+    },
+  });
+}
+
 /**
  * Updates the status of multiple customers.
- *
- * The underlying service currently exposes one-customer update
- * operations, so the hook coordinates those operations in parallel.
  */
 export function useBulkUpdateCustomers() {
   const queryClient = useQueryClient();

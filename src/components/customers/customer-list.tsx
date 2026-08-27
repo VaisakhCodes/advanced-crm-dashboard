@@ -5,19 +5,23 @@ import {
   useCustomers,
   useBulkDeleteCustomers,
   useBulkUpdateCustomers,
+  useReorderCustomers,
 } from "@/hooks/use-customers";
+
 import { CustomerToolbar } from "@/components/customers/customer-toolbar";
 import { CustomerTable } from "@/components/customers/customer-table";
 import { CustomerPagination } from "@/components/customers/customer-pagination";
 import { AdvancedCustomerFilters } from "@/components/customers/advanced-customer-filters";
 import { DeleteCustomerDialog } from "@/components/customers/delete-customer-dialog";
 import { Button } from "@/components/ui/button";
+
 import {
   defaultCustomerFilters,
   filterCustomers,
   hasActiveCustomerFilters,
   type CustomerFilters,
 } from "@/lib/customer-filters";
+
 import type { CustomerStatus } from "@/types/customer";
 
 const PAGE_SIZE = 10;
@@ -30,11 +34,19 @@ export function CustomerList() {
     refetch,
   } = useCustomers();
 
-  const bulkUpdateCustomers = useBulkUpdateCustomers();
-  const bulkDeleteCustomers = useBulkDeleteCustomers();
+  const bulkUpdateCustomers =
+    useBulkUpdateCustomers();
+
+  const bulkDeleteCustomers =
+    useBulkDeleteCustomers();
+
+  const reorderCustomers =
+    useReorderCustomers();
 
   const [filters, setFilters] =
-    useState<CustomerFilters>(defaultCustomerFilters);
+    useState<CustomerFilters>(
+      defaultCustomerFilters
+    );
 
   const [page, setPage] = useState(1);
 
@@ -44,7 +56,9 @@ export function CustomerList() {
   const [bulkDeleteOpen, setBulkDeleteOpen] =
     useState(false);
 
-  function handleFiltersChange(nextFilters: CustomerFilters) {
+  function handleFiltersChange(
+    nextFilters: CustomerFilters
+  ) {
     setFilters(nextFilters);
     setPage(1);
     setSelectedIds(new Set());
@@ -57,11 +71,10 @@ export function CustomerList() {
   }
 
   const filtered = useMemo(() => {
-    if (!customers) {
-      return [];
-    }
-
-    return filterCustomers(customers, filters);
+    return filterCustomers(
+      customers ?? [],
+      filters
+    );
   }, [customers, filters]);
 
   const totalPages = Math.max(
@@ -69,7 +82,10 @@ export function CustomerList() {
     Math.ceil(filtered.length / PAGE_SIZE)
   );
 
-  const currentPage = Math.min(page, totalPages);
+  const currentPage = Math.min(
+    page,
+    totalPages
+  );
 
   const pageItems = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -83,6 +99,7 @@ export function CustomerList() {
     (customers?.length ?? 0) > 0;
 
   const selectedCount = selectedIds.size;
+
   function handleToggleCustomer(id: string) {
     setSelectedIds((current) => {
       const next = new Set(current);
@@ -163,6 +180,25 @@ export function CustomerList() {
     }
   }
 
+  async function handleReorder(
+    activeId: string,
+    overId: string
+  ) {
+    if (activeId === overId) {
+      return;
+    }
+
+    try {
+      await reorderCustomers.mutateAsync({
+        activeId,
+        overId,
+      });
+    } catch {
+      // Keep the current UI state and allow the user
+      // to retry the reorder operation.
+    }
+  }
+
   function handlePageChange(nextPage: number) {
     setPage(nextPage);
     clearSelection();
@@ -230,7 +266,8 @@ export function CustomerList() {
               size="sm"
               disabled={
                 bulkUpdateCustomers.isPending ||
-                bulkDeleteCustomers.isPending
+                bulkDeleteCustomers.isPending ||
+                reorderCustomers.isPending
               }
               onClick={() =>
                 handleBulkStatusUpdate("active")
@@ -245,7 +282,8 @@ export function CustomerList() {
               size="sm"
               disabled={
                 bulkUpdateCustomers.isPending ||
-                bulkDeleteCustomers.isPending
+                bulkDeleteCustomers.isPending ||
+                reorderCustomers.isPending
               }
               onClick={() =>
                 handleBulkStatusUpdate("inactive")
@@ -260,7 +298,8 @@ export function CustomerList() {
               size="sm"
               disabled={
                 bulkUpdateCustomers.isPending ||
-                bulkDeleteCustomers.isPending
+                bulkDeleteCustomers.isPending ||
+                reorderCustomers.isPending
               }
               onClick={() =>
                 setBulkDeleteOpen(true)
@@ -275,7 +314,8 @@ export function CustomerList() {
               size="sm"
               disabled={
                 bulkUpdateCustomers.isPending ||
-                bulkDeleteCustomers.isPending
+                bulkDeleteCustomers.isPending ||
+                reorderCustomers.isPending
               }
               onClick={clearSelection}
             >
@@ -290,7 +330,8 @@ export function CustomerList() {
       filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-md border border-border py-16 text-center">
           <p className="text-sm text-foreground">
-            No customers match your current search or filter.
+            No customers match your current search or
+            filter.
           </p>
 
           <Button
@@ -319,6 +360,7 @@ export function CustomerList() {
             selectedIds={selectedIds}
             onToggleCustomer={handleToggleCustomer}
             onToggleAll={handleToggleAll}
+            onReorder={handleReorder}
           />
 
           {!isLoading && filtered.length > 0 && (
