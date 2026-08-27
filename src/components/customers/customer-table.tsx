@@ -8,10 +8,17 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
+} from "lucide-react";
 
 import {
   Table,
@@ -21,8 +28,16 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+
 import { Skeleton } from "@/components/ui/skeleton";
+
 import type { Customer } from "@/types/customer";
+
+import type {
+  CustomerSortField,
+  SortDirection,
+} from "@/lib/customer-filters";
+
 import { SortableCustomerRow } from "@/components/customers/sortable-customer-row";
 
 const COLUMN_COUNT = 8;
@@ -34,22 +49,64 @@ interface CustomerTableProps {
   onToggleCustomer: (id: string) => void;
   onToggleAll: () => void;
   onReorder: (activeId: string, overId: string) => void;
+  sortField: CustomerSortField | null;
+  sortDirection: SortDirection;
+  onSort: (field: CustomerSortField) => void;
+}
+
+function SortableHeader({
+  field,
+  label,
+  sortField,
+  sortDirection,
+  onSort,
+}: {
+  field: CustomerSortField;
+  label: string;
+  sortField: CustomerSortField | null;
+  sortDirection: SortDirection;
+  onSort: (field: CustomerSortField) => void;
+}) {
+  const isActive = sortField === field;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(field)}
+      className="inline-flex items-center gap-1 rounded-sm font-medium hover:text-foreground"
+      aria-label={`Sort by ${label}`}
+    >
+      <span>{label}</span>
+
+      {isActive ? (
+        sortDirection === "asc" ? (
+          <ArrowUp className="size-3.5" />
+        ) : (
+          <ArrowDown className="size-3.5" />
+        )
+      ) : (
+        <ChevronsUpDown className="size-3.5 text-muted-foreground" />
+      )}
+    </button>
+  );
 }
 
 function CustomerTableSkeleton() {
   return (
     <>
-      {Array.from({ length: 10 }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
-          {Array.from({ length: COLUMN_COUNT }).map(
-            (_, cellIndex) => (
+      {Array.from({ length: 10 }).map(
+        (_, rowIndex) => (
+          <TableRow key={rowIndex}>
+            {Array.from({
+              length: COLUMN_COUNT,
+            }).map((__, cellIndex) => (
               <TableCell key={cellIndex}>
                 <Skeleton className="h-4 w-full max-w-40" />
               </TableCell>
-            )
-          )}
-        </TableRow>
-      ))}
+            ))}
+          </TableRow>
+        )
+      )}
     </>
   );
 }
@@ -61,6 +118,9 @@ export function CustomerTable({
   onToggleCustomer,
   onToggleAll,
   onReorder,
+  sortField,
+  sortDirection,
+  onSort,
 }: CustomerTableProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -70,8 +130,9 @@ export function CustomerTable({
     })
   );
 
-  const selectedCount = customers.filter((customer) =>
-    selectedIds.has(customer.id)
+  const selectedCount = customers.filter(
+    (customer) =>
+      selectedIds.has(customer.id)
   ).length;
 
   const allSelected =
@@ -82,14 +143,19 @@ export function CustomerTable({
     selectedCount > 0 &&
     selectedCount < customers.length;
 
-  function handleDragEnd(event: DragEndEvent) {
+  function handleDragEnd(
+    event: DragEndEvent
+  ) {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
       return;
     }
 
-    onReorder(String(active.id), String(over.id));
+    onReorder(
+      String(active.id),
+      String(over.id)
+    );
   }
 
   return (
@@ -114,7 +180,8 @@ export function CustomerTable({
                     checked={allSelected}
                     ref={(element) => {
                       if (element) {
-                        element.indeterminate = someSelected;
+                        element.indeterminate =
+                          someSelected;
                       }
                     }}
                     onChange={onToggleAll}
@@ -128,7 +195,13 @@ export function CustomerTable({
                 </TableHead>
 
                 <TableHead className="min-w-[180px]">
-                  Customer
+                  <SortableHeader
+                    field="name"
+                    label="Customer"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={onSort}
+                  />
                 </TableHead>
 
                 <TableHead className="min-w-[160px]">
@@ -136,7 +209,13 @@ export function CustomerTable({
                 </TableHead>
 
                 <TableHead className="min-w-[220px]">
-                  Email
+                  <SortableHeader
+                    field="email"
+                    label="Email"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={onSort}
+                  />
                 </TableHead>
 
                 <TableHead className="min-w-[140px]">
@@ -148,7 +227,13 @@ export function CustomerTable({
                 </TableHead>
 
                 <TableHead className="min-w-[140px]">
-                  Last contact
+                  <SortableHeader
+                    field="lastContactDate"
+                    label="Last contact"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={onSort}
+                  />
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -168,9 +253,12 @@ export function CustomerTable({
               ) : (
                 <SortableContext
                   items={customers.map(
-                    (customer) => customer.id
+                    (customer) =>
+                      customer.id
                   )}
-                  strategy={verticalListSortingStrategy}
+                  strategy={
+                    verticalListSortingStrategy
+                  }
                 >
                   {customers.map((customer) => (
                     <SortableCustomerRow
@@ -179,7 +267,9 @@ export function CustomerTable({
                       isSelected={selectedIds.has(
                         customer.id
                       )}
-                      onToggleCustomer={onToggleCustomer}
+                      onToggleCustomer={
+                        onToggleCustomer
+                      }
                     />
                   ))}
                 </SortableContext>

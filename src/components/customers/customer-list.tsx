@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import {
   useCustomers,
   useBulkDeleteCustomers,
@@ -19,7 +20,10 @@ import {
   defaultCustomerFilters,
   filterCustomers,
   hasActiveCustomerFilters,
+  sortCustomers,
   type CustomerFilters,
+  type CustomerSortField,
+  type SortDirection,
 } from "@/lib/customer-filters";
 
 import type { CustomerStatus } from "@/types/customer";
@@ -56,6 +60,12 @@ export function CustomerList() {
   const [bulkDeleteOpen, setBulkDeleteOpen] =
     useState(false);
 
+  const [sortField, setSortField] =
+    useState<CustomerSortField | null>(null);
+
+  const [sortDirection, setSortDirection] =
+    useState<SortDirection>("asc");
+
   function handleFiltersChange(
     nextFilters: CustomerFilters
   ) {
@@ -70,12 +80,44 @@ export function CustomerList() {
     setSelectedIds(new Set());
   }
 
+  function handleSort(field: CustomerSortField) {
+    setSortField((currentField) => {
+      if (currentField === field) {
+        setSortDirection((currentDirection) =>
+          currentDirection === "asc"
+            ? "desc"
+            : "asc"
+        );
+
+        return currentField;
+      }
+
+      setSortDirection("asc");
+
+      return field;
+    });
+
+    setPage(1);
+    setSelectedIds(new Set());
+  }
+
   const filtered = useMemo(() => {
-    return filterCustomers(
+    const filteredCustomers = filterCustomers(
       customers ?? [],
       filters
     );
-  }, [customers, filters]);
+
+    return sortCustomers(
+      filteredCustomers,
+      sortField,
+      sortDirection
+    );
+  }, [
+    customers,
+    filters,
+    sortField,
+    sortDirection,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -194,8 +236,7 @@ export function CustomerList() {
         overId,
       });
     } catch {
-      // Keep the current UI state and allow the user
-      // to retry the reorder operation.
+      // Keep the current UI state and allow retry.
     }
   }
 
@@ -361,6 +402,9 @@ export function CustomerList() {
             onToggleCustomer={handleToggleCustomer}
             onToggleAll={handleToggleAll}
             onReorder={handleReorder}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
 
           {!isLoading && filtered.length > 0 && (

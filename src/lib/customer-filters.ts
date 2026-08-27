@@ -1,4 +1,7 @@
-import type { Customer, CustomerStatus } from "@/types/customer";
+import type {
+  Customer,
+  CustomerStatus,
+} from "@/types/customer";
 
 export type CustomerFilters = {
   search: string;
@@ -19,6 +22,13 @@ export const defaultCustomerFilters: CustomerFilters = {
   lastContactFrom: "",
   lastContactTo: "",
 };
+
+export type CustomerSortField =
+  | "name"
+  | "email"
+  | "lastContactDate";
+
+export type SortDirection = "asc" | "desc";
 
 export function filterCustomers(
   customers: Customer[],
@@ -69,6 +79,48 @@ export function filterCustomers(
       matchesFrom &&
       matchesTo
     );
+  });
+}
+
+export function sortCustomers(
+  customers: Customer[],
+  sortField: CustomerSortField | null,
+  sortDirection: SortDirection
+): Customer[] {
+  if (!sortField) {
+    return customers;
+  }
+
+  return [...customers].sort((a, b) => {
+    let comparison = 0;
+
+    switch (sortField) {
+      case "name":
+        comparison = a.name.localeCompare(
+          b.name,
+          undefined,
+          { sensitivity: "base" }
+        );
+        break;
+
+      case "email":
+        comparison = a.email.localeCompare(
+          b.email,
+          undefined,
+          { sensitivity: "base" }
+        );
+        break;
+
+      case "lastContactDate":
+        comparison = a.lastContactDate.localeCompare(
+          b.lastContactDate
+        );
+        break;
+    }
+
+    return sortDirection === "asc"
+      ? comparison
+      : -comparison;
   });
 }
 
