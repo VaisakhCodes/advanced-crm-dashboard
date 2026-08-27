@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { downloadCustomersCsv } from "@/lib/export-customers";
 
 import {
@@ -27,11 +29,16 @@ import {
   type SortDirection,
 } from "@/lib/customer-filters";
 
-import type { CustomerStatus } from "@/types/customer";
+import type {
+  Customer,
+  CustomerStatus,
+} from "@/types/customer";
 
 const PAGE_SIZE = 10;
 
 export function CustomerList() {
+  const router = useRouter();
+
   const {
     data: customers,
     isLoading,
@@ -39,19 +46,30 @@ export function CustomerList() {
     refetch,
   } = useCustomers();
 
-  const bulkUpdateCustomers = useBulkUpdateCustomers();
-  const bulkDeleteCustomers = useBulkDeleteCustomers();
-  const reorderCustomers = useReorderCustomers();
+  const bulkUpdateCustomers =
+    useBulkUpdateCustomers();
+
+  const bulkDeleteCustomers =
+    useBulkDeleteCustomers();
+
+  const reorderCustomers =
+    useReorderCustomers();
 
   const [filters, setFilters] =
-    useState<CustomerFilters>(defaultCustomerFilters);
+    useState<CustomerFilters>(
+      defaultCustomerFilters
+    );
 
   const [page, setPage] = useState(1);
 
   const [selectedIds, setSelectedIds] =
     useState<Set<string>>(new Set());
 
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] =
+    useState(false);
+
+  const [deleteCustomer, setDeleteCustomer] =
+    useState<Customer | null>(null);
 
   const [sortField, setSortField] =
     useState<CustomerSortField | null>(null);
@@ -73,17 +91,23 @@ export function CustomerList() {
     setSelectedIds(new Set());
   }
 
-  function handleSort(field: CustomerSortField) {
+  function handleSort(
+    field: CustomerSortField
+  ) {
     setSortField((currentField) => {
       if (currentField === field) {
-        setSortDirection((currentDirection) =>
-          currentDirection === "asc" ? "desc" : "asc"
+        setSortDirection(
+          (currentDirection) =>
+            currentDirection === "asc"
+              ? "desc"
+              : "asc"
         );
 
         return currentField;
       }
 
       setSortDirection("asc");
+
       return field;
     });
 
@@ -92,10 +116,11 @@ export function CustomerList() {
   }
 
   const filtered = useMemo(() => {
-    const filteredCustomers = filterCustomers(
-      customers ?? [],
-      filters
-    );
+    const filteredCustomers =
+      filterCustomers(
+        customers ?? [],
+        filters
+      );
 
     return sortCustomers(
       filteredCustomers,
@@ -111,10 +136,15 @@ export function CustomerList() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filtered.length / PAGE_SIZE)
+    Math.ceil(
+      filtered.length / PAGE_SIZE
+    )
   );
 
-  const currentPage = Math.min(page, totalPages);
+  const currentPage = Math.min(
+    page,
+    totalPages
+  );
 
   const pageItems = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -127,9 +157,12 @@ export function CustomerList() {
   const hasAnyCustomers =
     (customers?.length ?? 0) > 0;
 
-  const selectedCount = selectedIds.size;
+  const selectedCount =
+    selectedIds.size;
 
-  function handleToggleCustomer(id: string) {
+  function handleToggleCustomer(
+    id: string
+  ) {
     setSelectedIds((current) => {
       const next = new Set(current);
 
@@ -174,17 +207,20 @@ export function CustomerList() {
   async function handleBulkStatusUpdate(
     status: CustomerStatus
   ) {
-    const ids = Array.from(selectedIds);
+    const ids =
+      Array.from(selectedIds);
 
     if (ids.length === 0) {
       return;
     }
 
     try {
-      await bulkUpdateCustomers.mutateAsync({
-        ids,
-        status,
-      });
+      await bulkUpdateCustomers.mutateAsync(
+        {
+          ids,
+          status,
+        }
+      );
 
       clearSelection();
     } catch {
@@ -192,17 +228,41 @@ export function CustomerList() {
     }
   }
 
-  async function handleBulkDelete() {
-    const ids = Array.from(selectedIds);
+  function handleEdit(
+    customer: Customer
+  ) {
+    router.push(
+      `/customers/${customer.id}`
+    );
+  }
+
+  function handleDelete(
+    customer: Customer
+  ) {
+    setDeleteCustomer(customer);
+    setBulkDeleteOpen(true);
+  }
+
+  async function handleDeleteConfirm() {
+    const ids = deleteCustomer
+      ? [deleteCustomer.id]
+      : Array.from(selectedIds);
 
     if (ids.length === 0) {
       return;
     }
 
     try {
-      await bulkDeleteCustomers.mutateAsync(ids);
+      await bulkDeleteCustomers.mutateAsync(
+        ids
+      );
 
-      clearSelection();
+      if (deleteCustomer) {
+        setDeleteCustomer(null);
+      } else {
+        clearSelection();
+      }
+
       setBulkDeleteOpen(false);
     } catch {
       // Keep the dialog open so the user can retry.
@@ -235,7 +295,9 @@ export function CustomerList() {
     downloadCustomersCsv(filtered);
   }
 
-  function handlePageChange(nextPage: number) {
+  function handlePageChange(
+    nextPage: number
+  ) {
     setPage(nextPage);
     clearSelection();
   }
@@ -244,7 +306,8 @@ export function CustomerList() {
     return (
       <div className="flex flex-col items-center gap-3 rounded-md border border-border py-16 text-center">
         <p className="text-sm text-foreground">
-          Something went wrong while loading customers.
+          Something went wrong while loading
+          customers.
         </p>
 
         <Button
@@ -266,7 +329,9 @@ export function CustomerList() {
             ? `${filtered.length} of ${
                 customers?.length ?? 0
               } customers`
-            : `${customers?.length ?? 0} customers`}
+            : `${
+                customers?.length ?? 0
+              } customers`}
         </p>
       )}
 
@@ -275,8 +340,12 @@ export function CustomerList() {
         <div className="min-w-0 flex-1">
           <CustomerToolbar
             filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onExport={handleExportCsv}
+            onFiltersChange={
+              handleFiltersChange
+            }
+            onExport={
+              handleExportCsv
+            }
           />
         </div>
 
@@ -285,7 +354,9 @@ export function CustomerList() {
             <AdvancedCustomerFilters
               customers={customers}
               filters={filters}
-              onFiltersChange={handleFiltersChange}
+              onFiltersChange={
+                handleFiltersChange
+              }
             />
           </div>
         )}
@@ -313,7 +384,9 @@ export function CustomerList() {
                 reorderCustomers.isPending
               }
               onClick={() =>
-                handleBulkStatusUpdate("active")
+                handleBulkStatusUpdate(
+                  "active"
+                )
               }
             >
               Set Active
@@ -329,7 +402,9 @@ export function CustomerList() {
                 reorderCustomers.isPending
               }
               onClick={() =>
-                handleBulkStatusUpdate("inactive")
+                handleBulkStatusUpdate(
+                  "inactive"
+                )
               }
             >
               Set Inactive
@@ -360,7 +435,9 @@ export function CustomerList() {
                 bulkDeleteCustomers.isPending ||
                 reorderCustomers.isPending
               }
-              onClick={clearSelection}
+              onClick={
+                clearSelection
+              }
             >
               Clear
             </Button>
@@ -374,26 +451,30 @@ export function CustomerList() {
       filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-md border border-border py-16 text-center">
           <p className="text-sm text-foreground">
-            No customers match your current search or
-            filter.
+            No customers match your current
+            search or filter.
           </p>
 
           <Button
             variant="outline"
             size="sm"
-            onClick={handleResetFilters}
+            onClick={
+              handleResetFilters
+            }
           >
             Reset filters
           </Button>
         </div>
-      ) : !isLoading && !hasAnyCustomers ? (
+      ) : !isLoading &&
+        !hasAnyCustomers ? (
         <div className="flex flex-col items-center gap-1 rounded-md border border-border py-16 text-center">
           <p className="text-sm text-foreground">
             No customers yet.
           </p>
 
           <p className="text-xs text-muted-foreground">
-            Customers you add will appear here.
+            Customers you add will appear
+            here.
           </p>
         </div>
       ) : (
@@ -402,35 +483,66 @@ export function CustomerList() {
             customers={pageItems}
             isLoading={isLoading}
             selectedIds={selectedIds}
-            onToggleCustomer={handleToggleCustomer}
-            onToggleAll={handleToggleAll}
-            onReorder={handleReorder}
+            onToggleCustomer={
+              handleToggleCustomer
+            }
+            onToggleAll={
+              handleToggleAll
+            }
+            onReorder={
+              handleReorder
+            }
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             sortField={sortField}
-            sortDirection={sortDirection}
+            sortDirection={
+              sortDirection
+            }
             onSort={handleSort}
           />
 
-          {!isLoading && filtered.length > 0 && (
-            <CustomerPagination
-              page={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+          {!isLoading &&
+            filtered.length > 0 && (
+              <CustomerPagination
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={
+                  handlePageChange
+                }
+              />
+            )}
         </>
       )}
 
       <DeleteCustomerDialog
         open={bulkDeleteOpen}
-        onOpenChange={setBulkDeleteOpen}
-        customerName={`${selectedCount} ${
-          selectedCount === 1
-            ? "customer"
-            : "customers"
-        }`}
-        count={selectedCount}
-        onConfirm={handleBulkDelete}
-        isDeleting={bulkDeleteCustomers.isPending}
+        onOpenChange={(open) => {
+          setBulkDeleteOpen(open);
+
+          if (!open) {
+            setDeleteCustomer(null);
+          }
+        }}
+        customerName={
+          deleteCustomer
+            ? deleteCustomer.name
+            : `${selectedCount} ${
+                selectedCount === 1
+                  ? "customer"
+                  : "customers"
+              }`
+        }
+        count={
+          deleteCustomer
+            ? 1
+            : selectedCount
+        }
+        onConfirm={
+          handleDeleteConfirm
+        }
+        isDeleting={
+          bulkDeleteCustomers.isPending
+        }
       />
     </div>
   );

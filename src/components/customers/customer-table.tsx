@@ -41,7 +41,7 @@ import type {
 
 import { SortableCustomerRow } from "@/components/customers/sortable-customer-row";
 
-const COLUMN_COUNT = 8;
+const COLUMN_COUNT = 9;
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -50,6 +50,8 @@ interface CustomerTableProps {
   onToggleCustomer: (id: string) => void;
   onToggleAll: () => void;
   onReorder: (activeId: string, overId: string) => void;
+  onEdit: (customer: Customer) => void;
+  onDelete: (customer: Customer) => void;
   sortField: CustomerSortField | null;
   sortDirection: SortDirection;
   onSort: (field: CustomerSortField) => void;
@@ -119,6 +121,8 @@ export function CustomerTable({
   onToggleCustomer,
   onToggleAll,
   onReorder,
+  onEdit,
+  onDelete,
   sortField,
   sortDirection,
   onSort,
@@ -242,6 +246,10 @@ export function CustomerTable({
                     onSort={onSort}
                   />
                 </TableHead>
+
+                <TableHead className="w-[100px] text-right">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -277,6 +285,8 @@ export function CustomerTable({
                       onToggleCustomer={
                         onToggleCustomer
                       }
+                      onEdit={onEdit}
+                      onDelete={onDelete}
                     />
                   ))}
                 </SortableContext>
